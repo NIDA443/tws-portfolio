@@ -1,23 +1,25 @@
-name: Portfolio Deployment NIDA
+name: Portfolio Deployment
 
 on:
   push:
     branches:
-    - main
+      - main
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout
-      uses: actions/checkout@v1
+      - name: Checkout code
+        uses: actions/checkout@v3  # Updated from v1 to v3
 
-    - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: us-east-1
-
-    - name: Deploy static site to S3 bucket
-      run: aws s3 sync . s3://tws-junoon --delete
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2  # Updated from v1 to v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+          role-session-name: GitHubActions-${{ github.run_id }}  # Added for better tracing
+      - name: Deploy static site to S3 bucket
+        run: aws s3 sync ./build/ s3://devops-portfolio-1 --delete  # Added specific directory
+        env:
+          AWS_EC2_METADATA_DISABLED: true  # Prevents unnecessary metadata checks
